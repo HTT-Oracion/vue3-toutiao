@@ -1,73 +1,205 @@
 <template>
   <div class="my-container">
-    <van-cell-group>
-      <van-cell center>
+    <van-cell-group v-if="user" class="my-info">
+      <van-cell center :border="false" class="base-info">
         <template #title>
-          <span>昵称</span>
+          <span class="name">{{ currentUser.name }}</span>
         </template>
         <template #icon>
           <van-image
-            width="66"
-            height="66"
             round
             fit="cover"
-            src="https://img.yzcdn.cn/vant/cat.jpeg"
+            :src="currentUser.photo"
+            class="avatar"
           />
         </template>
         <template #default>
-          <van-button size="small" round>编辑资料</van-button>
+          <van-button size="small" round class="editBtn">编辑资料</van-button>
         </template>
       </van-cell>
-      <van-grid>
-        <van-grid-item>
-          <template #icon><span>8</span></template>
+      <van-grid :border="false" class="data-info">
+        <van-grid-item class="data-info-item">
+          <template #icon
+            ><span class="count">{{ currentUser.art_count }}</span></template
+          >
           <template #text>
-            <span>头条</span>
+            <span class="text">头条</span>
           </template>
         </van-grid-item>
-        <van-grid-item>
-          <template #icon><span>88</span></template>
+        <van-grid-item class="data-info-item">
+          <template #icon
+            ><span class="count">{{ currentUser.follow_count }}</span></template
+          >
           <template #text>
-            <span>关注</span>
+            <span class="text">关注</span>
           </template>
         </van-grid-item>
-        <van-grid-item>
-          <template #icon><span>64</span></template>
+        <van-grid-item class="data-info-item">
+          <template #icon
+            ><span class="count">{{ currentUser.fans_count }}</span></template
+          >
           <template #text>
-            <span>粉丝</span>
+            <span class="text">粉丝</span>
           </template>
         </van-grid-item>
-        <van-grid-item>
-          <template #icon><span>5</span></template>
+        <van-grid-item class="data-info-item">
+          <template #icon
+            ><span class="count">{{ currentUser.like_count }}</span></template
+          >
           <template #text>
-            <span>获赞</span>
+            <span class="text">获赞</span>
           </template>
         </van-grid-item>
       </van-grid>
     </van-cell-group>
-    <van-grid :column-num="2">
+    <!-- 未登录 -->
+    <div v-else class="not-login">
+      <div @click="$router.push('/login')">
+        <img src="../../assets/img/手机.png" class="mobile" />
+      </div>
+      <div class="text">登录 / 注册</div>
+    </div>
+    <van-grid :column-num="2" :border="false" class="nav-grid mb-4">
       <van-grid-item
         icon-prefix="iconfont"
         icon="iconfont iconshoucang"
         text="收藏"
+        class="nav-grid-item"
       />
       <van-grid-item
         icon-prefix="iconfont"
         icon="iconfont iconlishi"
         text="历史"
+        class="nav-grid-item"
       />
     </van-grid>
     <van-cell title="消息通知" is-link to="/" />
-    <van-cell title="小智同学" is-link to="/" />
-    <van-cell title="退出登录" />
+    <van-cell title="小智同学" is-link to="/" class="mb-4" />
+    <van-cell
+      v-if="user"
+      title="退出登录"
+      class="logoutBtn"
+      @click="onLogout"
+    />
   </div>
 </template>
 
 <script>
+import store from '@/store'
+import { useGetCurrentUser, useLogout } from '@/utils/user'
+import { onMounted, reactive, toRefs } from 'vue'
 export default {
-  name: 'MyIndex'
+  name: 'MyIndex',
+  setup () {
+    const state = reactive({
+      //token
+      user: '',
+      //当前用户信息
+      currentUser: {}
+    })
+    //退出登录
+    const onLogout = () => {
+      useLogout()
+    }
+    onMounted(async () => {
+      state.user = store.state.user
+      state.currentUser = await useGetCurrentUser()
+    })
+    return {
+      ...toRefs(state),
+      onLogout
+    }
+  }
 }
 </script>
 
-<style>
+<style lang="less" scoped>
+.my-container {
+  .my-info {
+    background: url('../../assets/img/banner.png') no-repeat;
+    background-size: cover;
+    .base-info {
+      height: 115px;
+      padding-top: 38px;
+      padding-bottom: 11px;
+      background: unset;
+      box-sizing: border-box;
+      .avatar {
+        height: 66px;
+        width: 66px;
+        margin-right: 11px;
+        border: 1px solid #fff;
+        box-sizing: border-box;
+      }
+      .name {
+        color: #fff;
+        font-size: 15px;
+      }
+      .editBtn {
+        height: 16px;
+        font-size: 10px;
+        color: #666;
+      }
+    }
+    .data-info {
+      .data-info-item {
+        height: 65px;
+        color: #fff;
+        .count {
+          font-size: 18px;
+        }
+        .text {
+          font-size: 11px;
+        }
+      }
+    }
+
+    :deep(.van-grid-item__content) {
+      background: unset;
+    }
+  }
+  /* 未登录 */
+  .not-login {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    height: 180px;
+    background: url('../../assets/img/banner.png') no-repeat;
+    background-size: cover;
+    .mobile {
+      width: 66px;
+      height: 66px;
+    }
+    .text {
+      color: #fff;
+      font-size: 14px;
+    }
+  }
+  :deep(.nav-grid) {
+    .nav-grid-item {
+      height: 70px;
+      .iconfont {
+        font-size: 22px;
+      }
+      .iconshoucang {
+        color: #eb5253;
+      }
+      .iconlishi {
+        color: #ff9d1d;
+      }
+      .van-grid-item__text {
+        font-size: 14px;
+        color: #333;
+      }
+    }
+  }
+  .logoutBtn {
+    text-align: center;
+    color: #d86262;
+  }
+  .mb-4 {
+    margin-bottom: 8px;
+  }
+}
 </style>

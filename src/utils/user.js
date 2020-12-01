@@ -1,6 +1,11 @@
 import store from '@/store'
-import { Toast } from 'vant'
-import { login, sendSms } from '@/api/user'
+import router from '@/router'
+import { Toast, Dialog } from 'vant'
+import { login, sendSms, getCurrentUser, getUserChannels } from '@/api/user'
+/**
+ * @method 登录
+ * @param {*} userData 手机号码&验证码
+ */
 export const useLogin = async userData => {
   Toast.loading({
     message: '加载中...',
@@ -11,6 +16,7 @@ export const useLogin = async userData => {
     const { data } = await login(userData)
     Toast.success('登陆成功');
     store.commit('setUser', data.data)
+    router.back()
   }
   catch (err) {
     Toast.fail('手机号码或验证码错误，请重试!');
@@ -19,7 +25,10 @@ export const useLogin = async userData => {
   }
 }
 
-//登录失败
+/**
+ * @method 表单验证失败的函数
+ * @param {*} error 
+ */
 export const useFailed = (error) => {
   if (error.errors[0]) {
     Toast({
@@ -28,7 +37,42 @@ export const useFailed = (error) => {
     })
   }
 }
-//发送验证码
+/**
+ * @method 退出登录
+ */
+export const useLogout = () => {
+  Dialog.confirm({
+    title: '退出提示',
+    message: '真的要退出登录吗？再考虑一下吧！',
+  })
+    .then(() => {
+      store.commit('setUser', null)
+      reload()
+    })
+    .catch(() => {
+      // on cancel
+    });
+}
+
+
+/**
+ * @method 刷新页面 
+ *
+ */
+
+export const reload = () => {
+  store.commit('setRouterAlive', false)
+  setTimeout(() => {
+    store.commit('setRouterAlive', true)
+  }, 0)
+}
+/**
+ * @method 发送验证码
+ * @param {} ref 表单的引用
+ * @param {} mobile 手机号码
+ * @param {} show isCountDownShow
+ */
+
 export const useSendSms = async (ref, mobile, show) => {
   try {
     await ref.value.validate('mobile')
@@ -51,4 +95,22 @@ export const useSendSms = async (ref, mobile, show) => {
       position: 'top'
     })
   }
+}
+
+/**
+ * @method 获取当前用户信息
+ */
+export const useGetCurrentUser = async () => {
+  const { data } = await getCurrentUser()
+  console.log(data.data);
+  return data.data
+}
+
+/**
+ * @method 获取用户频道列表
+ */
+export const useGetUserChannels = async () => {
+  const { data } = await getUserChannels()
+  console.log(data.data.channels);
+  return data.data.channels
 }

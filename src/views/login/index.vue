@@ -47,7 +47,7 @@
             class="send-btn"
             :loading="isSendSmsLoading"
             @click="onSendSms"
-            >发送验证码</van-button
+            >验证码</van-button
           >
         </template>
       </van-field>
@@ -71,7 +71,7 @@ export default {
   setup () {
     const state = reactive({
       user: {
-        mobile: '15914739335',
+        mobile: '17090086870',
         //验证码
         code: '246810'
       },
@@ -138,7 +138,6 @@ export default {
   border: none;
   .van-button__text {
     font-size: 11px;
-    color: #666666;
   }
 }
 .login-btn-wrapper {
