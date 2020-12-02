@@ -7,7 +7,7 @@
         >
       </template>
     </van-nav-bar>
-    <van-tabs v-model="active" class="channel-tabs">
+    <van-tabs v-model:active="active" class="channel-tabs">
       <van-tab
         v-for="item in channels"
         :key="item.id"
@@ -16,30 +16,64 @@
       >
         <article-list :channel="item"></article-list>
       </van-tab>
+      <template #nav-right>
+        <van-icon
+          name="wap-nav"
+          class="wap-nav-wrap"
+          @click="isEditChannelShow = true"
+        ></van-icon>
+      </template>
     </van-tabs>
+    <van-popup
+      v-model:show="isEditChannelShow"
+      position="bottom"
+      closeable
+      close-icon-position="top-left"
+      :style="{ height: '100%' }"
+      teleport="body"
+    >
+      <channel-edit
+        :userChannels="channels"
+        :channelActive="active"
+        @close="isEditChannelShow = false"
+        @new-active="updateActive"
+      ></channel-edit>
+    </van-popup>
   </div>
 </template>
 
 <script>
 import ArticleList from './ArticleList'
+import ChannelEdit from './ChannelEdit'
 import { useGetUserChannels } from '@/utils/user'
-import { onMounted, reactive, toRefs } from 'vue'
+import { computed, nextTick, onMounted, reactive, toRefs } from 'vue'
 export default {
   name: 'HomeIndex',
   components: {
-    ArticleList
+    ArticleList,
+    ChannelEdit
   },
   setup () {
     const state = reactive({
       active: 0,
-      channels: []
+      channels: [],
+      isEditChannelShow: true
     })
+    //切换标签
+    const updateActive = (index) => {
+      state.active = index
+      console.log(state.active);
+    }
     onMounted(async () => {
       state.channels = await useGetUserChannels()
       console.log(state.channels)
     })
+    nextTick(async () => {
+      state.channels = await useGetUserChannels()
+    })
     return {
-      ...toRefs(state)
+      ...toRefs(state),
+      updateActive
     }
   }
 }
@@ -63,6 +97,7 @@ export default {
     }
   }
   .channel-tabs {
+    padding-right: 33px;
     :deep(.van-tab) {
       min-width: 80px;
       border-right: 1px solid #f6f6f6;
@@ -75,6 +110,20 @@ export default {
       height: 3px;
       background: #168b88;
       bottom: 20px;
+    }
+    .wap-nav-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: fixed;
+      right: 0;
+      width: 33px;
+      height: 43px;
+      background-color: #fff;
+      opacity: 0.8;
+      .van-icon {
+        font-size: 24px;
+      }
     }
   }
 }

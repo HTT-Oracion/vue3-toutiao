@@ -7,7 +7,7 @@
       @refresh="onRefresh"
     >
       <van-list
-        v-model="loading"
+        v-model:loading="loading"
         :finished="finished"
         finished-text="没有更多了"
         loading-text="加载中..."
