@@ -6,7 +6,8 @@ const USER_KEY = 'userToken'
 export default createStore({
   state: {
     user: getItem(USER_KEY),
-    isRouterAlive: true
+    isRouterAlive: true,
+    // tabActive: 0
   },
   mutations: {
     setUser (state, data) {
@@ -16,6 +17,9 @@ export default createStore({
     setRouterAlive (state, bol) {
       state.isRouterAlive = bol
     }
+    // setTabActive (state, val) {
+    //   state.tabActive = val
+    // }
   },
   actions: {
   },

@@ -14,7 +14,9 @@
           />
         </template>
         <template #default>
-          <van-button size="small" round class="editBtn">编辑资料</van-button>
+          <van-button size="small" round class="editBtn" to="/userprofile"
+            >编辑资料</van-button
+          >
         </template>
       </van-cell>
       <van-grid :border="false" class="data-info">

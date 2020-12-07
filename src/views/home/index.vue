@@ -2,12 +2,18 @@
   <div class="home-container">
     <van-nav-bar class="app-nav-bar">
       <template #title>
-        <van-button class="search-btn" round type="primary" icon="search">
+        <van-button
+          class="search-btn"
+          round
+          type="primary"
+          icon="search"
+          to="/search"
+        >
           搜索</van-button
         >
       </template>
     </van-nav-bar>
-    <van-tabs v-model:active="active" class="channel-tabs">
+    <van-tabs v-model:active="active" class="channel-tabs" :key="vanTab">
       <van-tab
         v-for="item in channels"
         :key="item.id"
@@ -38,6 +44,7 @@
         @close="isEditChannelShow = false"
         @new-active="updateActive"
       ></channel-edit>
+      <!--  -->
     </van-popup>
   </div>
 </template>
@@ -45,8 +52,11 @@
 <script>
 import ArticleList from './ArticleList'
 import ChannelEdit from './ChannelEdit'
-import { useGetUserChannels } from '@/utils/user'
-import { computed, nextTick, onMounted, reactive, toRefs } from 'vue'
+// import { useGetUserChannels } from '@/utils/user'
+import { getItem } from '@/utils/storage'
+import store from '@/store'
+import { getUserChannels } from '@/api/user'
+import { getCurrentInstance, onMounted, reactive, toRefs, watch } from 'vue'
 export default {
   name: 'HomeIndex',
   components: {
@@ -54,23 +64,48 @@ export default {
     ChannelEdit
   },
   setup () {
+    const { ctx } = getCurrentInstance()
+    console.log(ctx);
     const state = reactive({
+      //控制频道标签的重新渲染
+      vanTab: 0,
       active: 0,
       channels: [],
       isEditChannelShow: true
     })
+    state.active = store.state.tabActive
     //切换标签
     const updateActive = (index) => {
       state.active = index
-      console.log(state.active);
+      // console.log('from homeIndex', state.active);
+    }
+    // 获取频道列表
+    const useGetUserChannels = async () => {
+      let realChannels = []
+      if (store.state.user) {
+        const { data } = await getUserChannels()
+        realChannels = data.data.channels
+      } else {
+        const localChannels = getItem('user-channels')
+        if (localChannels) {
+          realChannels = localChannels
+        } else {
+          const { data } = await getUserChannels()
+          realChannels = data.data.channels
+        }
+      }
+      if (state.vanTab === 0) {
+        state.vanTab += 1;
+      }
+      return realChannels
     }
     onMounted(async () => {
       state.channels = await useGetUserChannels()
-      console.log(state.channels)
     })
-    nextTick(async () => {
-      state.channels = await useGetUserChannels()
-    })
+
+    // watch(() => state.active, () => {
+    //   console.log(state.active);
+    // })
     return {
       ...toRefs(state),
       updateActive

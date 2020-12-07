@@ -1,3 +1,4 @@
+import { getCurrentInstance } from 'vue'
 import store from '@/store'
 import router from '@/router'
 import { Toast, Dialog } from 'vant'
@@ -109,8 +110,22 @@ export const useGetCurrentUser = async () => {
 /**
  * @method 获取用户频道列表
  */
-export const useGetUserChannels = async () => {
+export const useGetUserChannels = async (vanTab) => {
   const { data } = await getUserChannels()
   console.log(data.data.channels);
+  if (vanTab === 0) {
+    vanTab += 1;
+  }
   return data.data.channels
 }
+
+/**
+ *     const useGetUserChannels = async () => {
+      const { data } = await getUserChannels()
+      console.log(data.data.channels);
+      if (state.vanTab === 0) {
+        state.vanTab += 1;
+      }
+      return data.data.channels
+    }
+ */

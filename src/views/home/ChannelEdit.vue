@@ -40,6 +40,9 @@
 
 <script>
 import { useGetAllChannel } from '@/utils/channel'
+import { addUserChannel, deleteUserChannel } from '@/api/channel'
+import store from '@/store'
+import { setItem } from '@/utils/storage'
 import { computed, onMounted, reactive, toRefs } from 'vue';
 export default {
   name: 'ChannelEdit',
@@ -58,7 +61,7 @@ export default {
       allChannels: [],
       isEdit: false
     })
-    console.log(props.userChannels);
+    // console.log(props.userChannels);
     onMounted(async () => {
       const { data } = await useGetAllChannel()
       state.allChannels = data.channels
@@ -70,33 +73,50 @@ export default {
         )
       })
     })
-    const add = (channel) => {
+    const add = async channel => {
       props.userChannels.push(channel)
+      if (store.state.user) {
+        await addUserChannel({
+          channels: [{
+            id: channel.id, seq: props.userChannels.length
+          }]
+        })
+      } else {
+        setItem('user-channels', props.userChannels)
+      }
     }
 
     const userChannelClick = (channel, index) => {
       if (state.isEdit && index !== 0) {
-        deleteChannel(index)
+        deleteChannel(channel, index)
       } else {
         switchChannel(index)
       }
     }
-    const deleteChannel = (index) => {
+    const deleteChannel = async (channel, index) => {
       if (index <= props.channelActive) {
         emit('new-active', props.channelActive - 1)
+        // store.commit('setTabActive', props.channelActive - 1)
       }
       props.userChannels.splice(index, 1)
+      if (store.state.user) {
+        await deleteUserChannel(channel.id)
+      } else {
+        setItem('user-channels', props.userChannels)
+      }
     }
     const switchChannel = (index) => {
       emit('new-active', index)
+      // store.commit('setTabActive', index)
       emit('close')
+      console.log('from channel-edit', index);
     }
     console.log(recommendChannels);
     return {
       ...toRefs(state),
       recommendChannels,
-      add,
-      userChannelClick
+      userChannelClick,
+      add
     }
   }
 }
