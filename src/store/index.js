@@ -7,7 +7,7 @@ export default createStore({
   state: {
     user: getItem(USER_KEY),
     isRouterAlive: true,
-    // tabActive: 0
+    cachePage: ['LayoutIndex'],
   },
   mutations: {
     setUser (state, data) {
@@ -16,10 +16,20 @@ export default createStore({
     },
     setRouterAlive (state, bol) {
       state.isRouterAlive = bol
+    },
+    //添加缓存页面
+    addCachePage (state, pageName) {
+      if (!state.cachePage.includes(pageName)) {
+        state.cachePage.push(pageName)
+      }
+    },
+    //移除
+    removeCachePage (state, pageName) {
+      const index = state.cachePage.indexOf(pageName)
+      if (index !== -1) {
+        state.cachePage.splice(index, 1)
+      }
     }
-    // setTabActive (state, val) {
-    //   state.tabActive = val
-    // }
   },
   actions: {
   },

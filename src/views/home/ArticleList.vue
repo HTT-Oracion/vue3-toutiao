@@ -1,5 +1,5 @@
 <template>
-  <div class="article-list">
+  <div class="article-list" ref="articleListRef">
     <van-pull-refresh
       v-model="isRefreshLoading"
       :success-text="refreshSuccessText"
@@ -30,8 +30,9 @@
 
 <script>
 import ArticleItem from '@/components/ArticleItem'
-import { onMounted, reactive, toRefs } from 'vue'
+import { onActivated, onMounted, reactive, ref, toRefs } from 'vue'
 import { useGetArticleList } from '@/utils/article'
+import { debounce } from 'loadsh'
 export default {
   name: 'ArticleList',
   components: {
@@ -51,8 +52,10 @@ export default {
       finished: false,
       refreshing: false,
       isRefreshLoading: false,
-      refreshSuccessText: ''
+      refreshSuccessText: '',
+      scrollTop: 0
     })
+    const articleListRef = ref(null)
     const onLoad = async () => {
       const { data } = await useGetArticleList(props.channel.id, state.timestamp || Date.now(), 1)
       state.articles.push(...data.results)
@@ -63,6 +66,12 @@ export default {
       } else {
         state.finished = true
       }
+    }
+    const loadScroll = () => {
+      const articleList = articleListRef.value
+      articleList.onscroll = debounce(() => {
+        state.scrollTop = articleList.scrollTop
+      }, 50)
     }
     const onRefresh = async () => {
       //下拉刷新
@@ -75,8 +84,15 @@ export default {
       state.isRefreshLoading = false
       state.refreshSuccessText = `更新了${data.results.length}条数据`
     }
+    onMounted(() => {
+      loadScroll()
+    })
+    onActivated(() => {
+      rticleListRef.value.scrollTop = state.scrollTop
+    })
     return {
       ...toRefs(state),
+      articleListRef,
       onLoad,
       onRefresh
     }

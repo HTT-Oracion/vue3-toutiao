@@ -1,5 +1,6 @@
 <template>
   <div class="home-container">
+    <!-- 导航栏 -->
     <van-nav-bar class="app-nav-bar">
       <template #title>
         <van-button
@@ -13,13 +14,15 @@
         >
       </template>
     </van-nav-bar>
-    <van-tabs v-model:active="active" class="channel-tabs" :key="vanTab">
+    <!-- 文章频道 -->
+    <van-tabs v-model="active" class="channel-tabs">
       <van-tab
         v-for="item in channels"
         :key="item.id"
         :title="item.name"
         class="tab-item"
-      >
+      > 
+      <!-- 文章列表 -->
         <article-list :channel="item"></article-list>
       </van-tab>
       <template #nav-right>
@@ -40,11 +43,11 @@
     >
       <channel-edit
         :userChannels="channels"
-        :channelActive="active"
+        v-model="active"
         @close="isEditChannelShow = false"
-        @new-active="updateActive"
+        @update-channels="updateChannels"
       ></channel-edit>
-      <!--  -->
+      <!--    @new-active="updateActive" -->
     </van-popup>
   </div>
 </template>
@@ -52,7 +55,6 @@
 <script>
 import ArticleList from './ArticleList'
 import ChannelEdit from './ChannelEdit'
-// import { useGetUserChannels } from '@/utils/user'
 import { getItem } from '@/utils/storage'
 import store from '@/store'
 import { getUserChannels } from '@/api/user'
@@ -71,14 +73,14 @@ export default {
       vanTab: 0,
       active: 0,
       channels: [],
-      isEditChannelShow: true
+      isEditChannelShow: false
     })
-    state.active = store.state.tabActive
+    // state.active = store.state.tabActive
     //切换标签
-    const updateActive = (index) => {
-      state.active = index
-      // console.log('from homeIndex', state.active);
-    }
+    // const updateActive = (index) => {
+    //   state.active = index
+    //   // console.log('from homeIndex', state.active);
+    // }
     // 获取频道列表
     const useGetUserChannels = async () => {
       let realChannels = []
@@ -94,21 +96,24 @@ export default {
           realChannels = data.data.channels
         }
       }
-      if (state.vanTab === 0) {
-        state.vanTab += 1;
-      }
-      return realChannels
+      // if (state.vanTab === 0) {
+      //   state.vanTab += 1;
+      // }
+      state.channels = realChannels
     }
-    onMounted(async () => {
-      state.channels = await useGetUserChannels()
+    const updateChannels = (index) => {
+      state.channels.splice(index, 1)
+    }
+    onMounted(() => {
+      useGetUserChannels()
     })
 
-    // watch(() => state.active, () => {
-    //   console.log(state.active);
+    // watch(() => state.channels, () => {
+    //   useGetUserChannels()
     // })
     return {
       ...toRefs(state),
-      updateActive
+      updateChannels
     }
   }
 }

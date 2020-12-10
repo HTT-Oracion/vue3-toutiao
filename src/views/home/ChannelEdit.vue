@@ -12,7 +12,7 @@
     <van-grid :gutter="10">
       <van-grid-item
         class="grid-item"
-        :class="{ active: index === channelActive }"
+        :class="{ active: index === modelValue }"
         v-for="(channel, index) in userChannels"
         :key="index"
         :text="channel.name"
@@ -51,7 +51,7 @@ export default {
       type: Array,
       required: true
     },
-    channelActive: {
+    modelValue: {
       type: Number,
       required: true
     }
@@ -74,16 +74,16 @@ export default {
       })
     })
     const add = async channel => {
-      props.userChannels.push(channel)
-      if (store.state.user) {
-        await addUserChannel({
-          channels: [{
-            id: channel.id, seq: props.userChannels.length
-          }]
-        })
-      } else {
-        setItem('user-channels', props.userChannels)
+      if (!state.isEdit) {
+        return;
       }
+      props.userChannels.push(channel)
+      await addUserChannel({
+        channels: [{
+          id: channel.id, seq: props.userChannels.length
+        }]
+      })
+      setItem('user-channels', props.userChannels)
     }
 
     const userChannelClick = (channel, index) => {
@@ -94,11 +94,12 @@ export default {
       }
     }
     const deleteChannel = async (channel, index) => {
-      if (index <= props.channelActive) {
-        emit('new-active', props.channelActive - 1)
+      if (index <= props.modelValue) {
+        emit('update:modelValue', props.modelValue - 1)
         // store.commit('setTabActive', props.channelActive - 1)
       }
-      props.userChannels.splice(index, 1)
+      emit('update-channels', index)
+      // props.userChannels.splice(index, 1)
       if (store.state.user) {
         await deleteUserChannel(channel.id)
       } else {
@@ -106,7 +107,7 @@ export default {
       }
     }
     const switchChannel = (index) => {
-      emit('new-active', index)
+      emit('update:modelValue', index)
       // store.commit('setTabActive', index)
       emit('close')
       console.log('from channel-edit', index);

@@ -129,7 +129,4 @@ export default {
 .van-popup {
   background-color: #f5f7f9;
 }
-.photo-popup {
-  background-color: #000;
-}
 </style>

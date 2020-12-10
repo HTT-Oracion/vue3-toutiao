@@ -56,7 +56,16 @@
     </van-cell-group>
     <!-- 未登录 -->
     <div v-else class="not-login">
-      <div @click="$router.push('/login')">
+      <div
+        @click="
+          $router.push({
+            name: 'login',
+            query: {
+              redirect: '/my'
+            }
+          })
+        "
+      >
         <img src="../../assets/img/手机.png" class="mobile" />
       </div>
       <div class="text">登录 / 注册</div>
@@ -76,7 +85,7 @@
       />
     </van-grid>
     <van-cell title="消息通知" is-link to="/" />
-    <van-cell title="小智同学" is-link to="/" class="mb-4" />
+    <van-cell title="小智同学" is-link to="/userchat" class="mb-4" />
     <van-cell
       v-if="user"
       title="退出登录"
@@ -89,7 +98,7 @@
 <script>
 import store from '@/store'
 import { useGetCurrentUser, useLogout } from '@/utils/user'
-import { onMounted, reactive, toRefs } from 'vue'
+import { getCurrentInstance, nextTick, onMounted, reactive, toRefs, watch } from 'vue'
 export default {
   name: 'MyIndex',
   setup () {
@@ -97,8 +106,11 @@ export default {
       //token
       user: '',
       //当前用户信息
-      currentUser: {}
+      currentUser: {},
+      //控制页面的刷新
+      loginWrap: 0
     })
+    const { ctx } = getCurrentInstance()
     //退出登录
     const onLogout = () => {
       useLogout()

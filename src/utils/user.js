@@ -1,8 +1,9 @@
-import { getCurrentInstance } from 'vue'
 import store from '@/store'
 import router from '@/router'
 import { Toast, Dialog } from 'vant'
+import { useRoute } from 'vue-router'
 import { login, sendSms, getCurrentUser, getUserChannels } from '@/api/user'
+const route = useRoute()
 /**
  * @method 登录
  * @param {*} userData 手机号码&验证码
@@ -16,13 +17,13 @@ export const useLogin = async userData => {
   try {
     const { data } = await login(userData)
     Toast.success('登陆成功');
+    store.commit('removeCachePage', 'LayoutIndex')
     store.commit('setUser', data.data)
-    router.back()
+    router.push(route.query.redirect || '/')
   }
   catch (err) {
     Toast.fail('手机号码或验证码错误，请重试!');
     console.log('登录失败', err)
-
   }
 }
 
@@ -48,7 +49,6 @@ export const useLogout = () => {
   })
     .then(() => {
       store.commit('setUser', null)
-      reload()
     })
     .catch(() => {
       // on cancel
